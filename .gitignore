@@ -1,5 +1,5 @@
-.venv
-.idea
-__pychache__/
+.venv/
+.idea/
+__pycache__/
 *.local*
 
