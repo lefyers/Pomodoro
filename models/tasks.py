@@ -1,16 +1,7 @@
-from typing import Any, Optional
+from typing import Optional
+from sqlalchemy.orm import Mapped, mapped_column
+from database import Base
 
-from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase, declared_attr
-
-class Base(DeclarativeBase):
-    id: Any
-    __name__: str
-
-    __allow_unmapped__ = True
-
-    @declared_attr
-    def __tablename__(self) -> str:
-        return self.__name__.lower()
 
 class Tasks(Base):
     __tablename__ = "Tasks"
