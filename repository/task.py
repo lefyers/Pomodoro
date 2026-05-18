@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import update
 
 from models import Tasks, Categories
+from schema import TaskCreateSchema
 from schema.task import TaskSchema
 
 
@@ -21,8 +22,13 @@ class TaskRepository:
             task: Tasks = session.execute(select(Tasks).where(Tasks.id == task_id)).scalar_one_or_none()
         return task
 
-    def create_task(self, task: TaskSchema) -> int:
-        task_model = Tasks(name=task.name, pomodoro_count=task.pomodoro_count, category_id=task.category_id)
+    def create_task(self, task: TaskCreateSchema, user_id: int) -> int:
+        task_model = Tasks(
+            name=task.name,
+            pomodoro_count=task.pomodoro_count,
+            category_id=task.category_id,
+            user_id=user_id
+        )
         with self.db_session() as session:
             session.add(task_model)
             session.commit()
