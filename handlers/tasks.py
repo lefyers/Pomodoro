@@ -1,6 +1,6 @@
 from typing import Annotated
 from fastapi import APIRouter, status, Depends
-from dependency import get_tasks_repository, get_task_service
+from dependency import get_tasks_repository, get_task_service, get_request_user_id
 from repository import TaskRepository, TaskCache
 from schema.task import TaskSchema
 from service.task import TaskService
@@ -11,23 +11,15 @@ router = APIRouter(prefix="/task", tags=["task"])
 @router.get("/all", response_model=list[TaskSchema])
 async def get_tasks(
         task_service: Annotated[TaskService, Depends(get_task_service)]
-        # task_repository: Annotated[TaskRepository, Depends(get_tasks_repository)],
-        # task_cache: Annotated[TaskCache, Depends(get_tasks_cache_repository)]
 ):
     return task_service.get_tasks()
-    # if tasks := task_cache.get_tasks():
-    #     return tasks
-    # else:
-    #     tasks = task_repository.get_tasks()
-    #     tasks_schema = [TaskSchema.model_validate(task) for task in tasks]
-    #     task_cache.set_tasks(tasks_schema)
-    #     return tasks
 
 
 @router.post("/", response_model=TaskSchema)
 async def create_task(
         task: TaskSchema,
-        task_repository: Annotated[TaskRepository, Depends(get_tasks_repository)]
+        task_repository: Annotated[TaskRepository, Depends(get_tasks_repository)],
+        user_id: int = Depends(get_request_user_id)
 ):
     task_id = task_repository.create_task(task)
     task.id = task_id
