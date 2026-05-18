@@ -1,6 +1,7 @@
 from typing import Annotated
-from fastapi import APIRouter, status, Depends
+from fastapi import APIRouter, status, Depends, HTTPException
 from dependency import get_tasks_repository, get_task_service, get_request_user_id
+from exception import TaskNotFound
 from repository import TaskRepository, TaskCache
 from schema import TaskSchema, TaskCreateSchema
 from service.task import TaskService
@@ -27,17 +28,24 @@ async def create_task(
 
 @router.patch("/{task_id}", response_model=TaskSchema)
 async def patch_task(
-        task_id: int,
-        name: str,
-        task_repository: Annotated[TaskRepository, Depends(get_tasks_repository)]
+    task_id: int,
+    name: str,
+    task_service: Annotated[TaskService, Depends(get_task_service)],
+    user_id: int = Depends(get_request_user_id)
 ):
-    return task_repository.update_task_name(task_id, name)
+    try:
+        return task_service.update_task_name(task_id=task_id, name=name, user_id=user_id)
+    except TaskNotFound as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.detail)
 
 
 @router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_task(
-        task_id: int,
-        task_repository: Annotated[TaskRepository, Depends(get_tasks_repository)]
+    task_id: int,
+    task_service: Annotated[TaskService, Depends(get_task_service)],
+    user_id: int = Depends(get_request_user_id),
 ):
-    task_repository.delete_task(task_id)
-    return {"message": "Task not found"}
+    try:
+        task_service.delete_task(task_id=task_id, user_id=user_id)
+    except TaskNotFound as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.detail)
