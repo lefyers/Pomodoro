@@ -20,7 +20,7 @@ class AuthService:
 
     def google_auth(self, code: str):
         user_data = self.google_client.get_user_info(code=code)
-        print(user_data)
+        self.user_repository.create_user(user_data)
 
     def get_google_redirect_url(self) -> str:
         return self.settings.google_redirect_url
