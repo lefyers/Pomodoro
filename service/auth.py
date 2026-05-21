@@ -5,6 +5,7 @@ from jose.exceptions import JWTError
 from dataclasses import dataclass
 
 from client.google import GoogleClient
+from client.yandex import YandexClient
 from exception import UserNotFoundException, UserNotCorrectPasswordException, TokenExpired, TokenNotCorrect
 from models import UserProfile
 from repository import UserRepository
@@ -17,6 +18,7 @@ class AuthService:
     user_repository: UserRepository
     settings: Settings
     google_client: GoogleClient
+    yandex_client: YandexClient
 
     def google_auth(self, code: str):
         user_data = self.google_client.get_user_info(code=code)
@@ -35,6 +37,10 @@ class AuthService:
         access_token = self.generate_access_token(user_id=created_user.id)
         print("user_create")
         return UserLoginSchema(user_id=created_user.id, access_token=access_token)
+
+    def yandex_auth(self, code: str):
+        user_data = self.yandex_client.get_user_info(code=code)
+        print(user_data)
 
     def get_google_redirect_url(self) -> str:
         return self.settings.google_redirect_url

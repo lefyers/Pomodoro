@@ -68,4 +68,4 @@ async def yandex_auth(
         auth_service: Annotated[AuthService, Depends(get_auth_service)],
         code: str
 ):
-    print(code, "code")
+    return auth_service.yandex_auth(code=code)
