@@ -1,7 +1,7 @@
 ENV_FILE ?= .local.env
 
 run: #make run ENV_FILE=.local.env
-	poetry run uvicorn main:app --host 127.0.0.1 --port 8000 --reload --env-file $(ENV_FILE)
+	poetry run uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload --env-file $(ENV_FILE)
 
 add: #make add LIBRARY=pydantic
 	poetry add $(LIBRARY)
