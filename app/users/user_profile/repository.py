@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from sqlalchemy import insert, select
 from sqlalchemy.orm import Session
-from app.models import UserProfile
-from app.schema import UserCreateSchema
+from app.users.user_profile.models import UserProfile
+from app.users.user_profile.schema import UserCreateSchema
 
 
 @dataclass
@@ -25,7 +25,6 @@ class UserRepository:
             session.flush()
             return self.get_user(user_id)
 
-
     def get_user(self, user_id) -> UserProfile | None:
         query = select(UserProfile).where(UserProfile.id == user_id)
         with self.db_session() as session:
@@ -33,6 +32,5 @@ class UserRepository:
 
     def get_user_by_username(self, username: str) -> UserProfile | None:
         query = select(UserProfile).where(UserProfile.username == username)
-        with self.db_session() as session:
+        with self.db_session as session:
             return session.execute(query).scalar_one_or_none()
-        

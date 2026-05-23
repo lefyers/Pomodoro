@@ -1,8 +1,7 @@
 from dataclasses import dataclass
-
 from app.exception import TaskNotFound
-from app.repository import TaskRepository, TaskCache
-from app.schema.task import TaskSchema, TaskCreateSchema
+from app.tasks.repository import TaskRepository, TaskCache
+from app.tasks.schema import TaskSchema, TaskCreateSchema
 
 
 @dataclass
@@ -14,7 +13,7 @@ class TaskService:
         if cache_task := await self.task_cache.get_tasks():
             return cache_task
         else:
-            tasks = self.task_repository.get_tasks()
+            tasks = await self.task_repository.get_tasks()
             tasks_schema = [TaskSchema.model_validate(task) for task in tasks]
             await self.task_cache.set_tasks(tasks_schema)
             return tasks_schema
@@ -37,4 +36,3 @@ class TaskService:
             raise TaskNotFound
         await self.task_repository.delete_task(task_id=task_id, user_id=user_id)
 
-    

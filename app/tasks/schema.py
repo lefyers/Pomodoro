@@ -10,12 +10,13 @@ class TaskSchema(BaseModel):
 
     class Config:
         from_attributes = True
-    
+
     @model_validator(mode="after")
     def check_name_or_pomodoro_count_is_not_none(self):
         if self.name is None and self.pomodoro_count is None:
             raise ValueError("name or pomodoro_count must be provided")
         return self
+
 
 class TaskCreateSchema(BaseModel):
     name: str | None = None
