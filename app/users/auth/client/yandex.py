@@ -10,8 +10,8 @@ class YandexClient:
     async_client: httpx.AsyncClient
 
     async def get_user_info(self, code: str):
-        access_token = self._get_user_access_token(code=code)
-        async with self.async_client() as client:
+        access_token = await self._get_user_access_token(code=code)
+        async with self.async_client as client:
             user_info = await client.get(
                 "https://login.yandex.ru/info?format=json",
                     headers={"Authorization": f"OAuth {access_token}"}
@@ -19,7 +19,7 @@ class YandexClient:
         return YandexUserData(**user_info.json(), access_token=access_token)
 
     async def _get_user_access_token(self, code: str) -> str:
-        async with self.async_client() as client:
+        async with self.async_client as client:
             response = await client.post(
                 self.settings.YANDEX_TOKEN_URL,
                 data={

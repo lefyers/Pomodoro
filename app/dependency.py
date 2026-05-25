@@ -48,7 +48,10 @@ async def get_auth_service(
 
 ) -> AuthService:
     return AuthService(
-        user_repository=user_repository, settings=Settings(), google_client=google_client, yandex_client=yandex_client
+        user_repository=user_repository,
+        settings=Settings(),
+        google_client=google_client,
+        yandex_client=yandex_client
     )
 
 async def get_user_service(

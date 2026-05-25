@@ -1,6 +1,6 @@
-from datetime import datetime as dt, timedelta
-from jose import jwt
-from jose.exceptions import JWTError
+import datetime
+from datetime import datetime as dt, UTC, timedelta
+from jose import jwt, JWTError
 from dataclasses import dataclass
 from app.users.auth.client import GoogleClient
 from app.users.auth.client import YandexClient
@@ -71,19 +71,18 @@ class AuthService:
             raise UserNotCorrectPasswordException
 
     def generate_access_token(self, user_id: str):
-        expires_date_unix = (dt.utcnow() + timedelta(days=7)).timestamp()
-        token = jwt.encode(
-            {"user_id": user_id, "expire": expires_date_unix},
-            self.settings.JWT_SECRET_KEY,
-            algorithm=self.settings.JWT_ENCODE_ALGORITHM
-        )
-        return token
+        payload = {
+            "user_id": user_id,
+            "expire": (dt.now(UTC) + timedelta(days=7)).timestamp()
+        }
+        encoded_jwt = jwt.encode(payload, self.settings.JWT_SECRET_KEY, algorithm=self.settings.JWT_ENCODE_ALGORITHM)
+        return encoded_jwt
 
     def get_user_id_from_access_token(self, access_token: str) -> int:
         try:
             payload = jwt.decode(access_token, self.settings.JWT_SECRET_KEY, algorithms=[self.settings.JWT_ENCODE_ALGORITHM])
         except JWTError:
             raise TokenNotCorrect
-        if payload["expire"] < dt.utcnow().timestamp():
+        if payload["expire"] < dt.now(UTC).timestamp():
             raise TokenExpired
         return payload["user_id"]
