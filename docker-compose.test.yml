@@ -2,20 +2,20 @@ version: '4.71.0'
 
 services:
 
-  db:
+  db-test:
     image: postgres:18.2
     restart: always
     # set shared memory limit when using docker compose
     shm_size: 128mb
     ports:
-      - '5432:5432'
+      - '5433:5432'
     environment:
       POSTGRES_PASSWORD: password
       POSTGRES_USER: postgres
-      POSTGRES_DB: pomodoro
+      POSTGRES_DB: pomodoro-test
 
-  cache:
+  cache-test:
     image: redis:8.6.3-alpine
     restart: always
     ports:
-      - '6379:6379'
+      - '6380:6379'
