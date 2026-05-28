@@ -1,15 +1,16 @@
-import datetime
-from datetime import datetime as dt, UTC, timedelta
-from jose import jwt, JWTError
 from dataclasses import dataclass
+from datetime import datetime as dt, UTC, timedelta
+
+from jose import jwt, JWTError
+
+from app.exception import UserNotFoundException, UserNotCorrectPasswordException, TokenExpired, TokenNotCorrect
+from app.settings import Settings
 from app.users.auth.client import GoogleClient
 from app.users.auth.client import YandexClient
-from app.exception import UserNotFoundException, UserNotCorrectPasswordException, TokenExpired, TokenNotCorrect
+from app.users.auth.schema import UserLoginSchema
 from app.users.user_profile.models import UserProfile
 from app.users.user_profile.repository import UserRepository
 from app.users.user_profile.schema import UserCreateSchema
-from app.users.auth.schema import UserLoginSchema
-from app.settings import Settings
 
 
 @dataclass
@@ -20,7 +21,7 @@ class AuthService:
     yandex_client: YandexClient
 
     async def google_auth(self, code: str):
-        user_data = await self.google_client.get_user_info(code=code)
+        user_data = await self.google_client.get_user_info(code)
 
         if user := await self.user_repository.get_user_by_email(email=user_data.email):
             access_token = self.generate_access_token(user_id=user.id)
@@ -80,7 +81,8 @@ class AuthService:
 
     def get_user_id_from_access_token(self, access_token: str) -> int:
         try:
-            payload = jwt.decode(access_token, self.settings.JWT_SECRET_KEY, algorithms=[self.settings.JWT_ENCODE_ALGORITHM])
+            payload = jwt.decode(access_token, self.settings.JWT_SECRET_KEY,
+                                 algorithms=[self.settings.JWT_ENCODE_ALGORITHM])
         except JWTError:
             raise TokenNotCorrect
         if payload["expire"] < dt.now(UTC).timestamp():

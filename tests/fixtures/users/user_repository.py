@@ -1,7 +1,5 @@
 from dataclasses import dataclass
-
 import pytest
-
 from app.users.user_profile.schema import UserCreateSchema
 from tests.fixtures.users.user_model import UserProfileFactory
 
@@ -16,5 +14,5 @@ class FakeUserRepository:
         return UserProfileFactory()
 
 @pytest.fixture
-def user_repository():
+def fake_user_repository():
     return FakeUserRepository()
