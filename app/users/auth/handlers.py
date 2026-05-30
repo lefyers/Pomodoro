@@ -16,7 +16,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 )
 async def login(
     body: UserCreateSchema,
-    auth_service: Annotated[AuthService, Depends(get_auth_service)]
+    auth_service: Annotated[AuthService, Depends(get_auth_service)],
 ):
     try:
         return await auth_service.login(body.username, body.password)
