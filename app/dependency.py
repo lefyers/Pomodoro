@@ -23,76 +23,97 @@ async def get_broker_producer() -> BrokerProducer:
         producer=AIOKafkaProducer(
             bootstrap_servers=settings.BROKER_URL,
         ),
-        email_topic=settings.EMAIL_TOPIC
+        email_topic=settings.EMAIL_TOPIC,
     )
+
 
 async def get_broker_consumer() -> BrokerConsumer:
     settings = Settings()
     return BrokerConsumer(
         consumer=AIOKafkaConsumer(
             settings.EMAIL_CALLBACK_TOPIC,
-            bootstrap_servers='localhost:9092',
-            value_deserializer=lambda message: json.loads(message.decode('utf-8'))
+            bootstrap_servers="localhost:9092",
+            value_deserializer=lambda message: json.loads(message.decode("utf-8")),
         ),
-        email_callback_topic=settings.EMAIL_CALLBACK_TOPIC
+        email_callback_topic=settings.EMAIL_CALLBACK_TOPIC,
     )
 
-async def get_mail_client(
-        broker_producer=Depends(get_broker_producer),
-        broker_consumer=Depends(get_broker_consumer)
-) -> MailClient:
-    return MailClient(settings=Settings(), broker_producer=broker_producer, broker_consumer=broker_consumer)
 
-async def get_tasks_repository(db_session: AsyncSession = Depends(get_db_session)) -> TaskRepository:
+async def get_mail_client(
+    broker_producer=Depends(get_broker_producer),
+    broker_consumer=Depends(get_broker_consumer),
+) -> MailClient:
+    return MailClient(
+        settings=Settings(),
+        broker_producer=broker_producer,
+        broker_consumer=broker_consumer,
+    )
+
+
+async def get_tasks_repository(
+    db_session: AsyncSession = Depends(get_db_session),
+) -> TaskRepository:
     return TaskRepository(db_session)
+
 
 async def get_tasks_cache_repository() -> TaskCache:
     redis_connection = get_redis_connection()
     return TaskCache(redis_connection)
 
-async def get_task_service(
-        task_repository: TaskRepository = Depends(get_tasks_repository),
-        task_cache: TaskCache = Depends(get_tasks_cache_repository)
-) -> TaskService:
-    return TaskService(
-        task_repository=task_repository,
-        task_cache=task_cache
-    )
 
-async def get_user_repository(db_session: AsyncSession = Depends(get_db_session)) -> UserRepository:
+async def get_task_service(
+    task_repository: TaskRepository = Depends(get_tasks_repository),
+    task_cache: TaskCache = Depends(get_tasks_cache_repository),
+) -> TaskService:
+    return TaskService(task_repository=task_repository, task_cache=task_cache)
+
+
+async def get_user_repository(
+    db_session: AsyncSession = Depends(get_db_session),
+) -> UserRepository:
     return UserRepository(db_session=db_session)
+
 
 async def get_async_client() -> httpx.AsyncClient:
     return httpx.AsyncClient()
 
-async def get_google_client(async_client: httpx.AsyncClient = Depends(get_async_client)) -> GoogleClient:
+
+async def get_google_client(
+    async_client: httpx.AsyncClient = Depends(get_async_client),
+) -> GoogleClient:
     return GoogleClient(settings=Settings(), async_client=async_client)
 
-async def get_yandex_client(async_client: httpx.AsyncClient = Depends(get_async_client)) -> YandexClient:
+
+async def get_yandex_client(
+    async_client: httpx.AsyncClient = Depends(get_async_client),
+) -> YandexClient:
     return YandexClient(settings=Settings(), async_client=async_client)
 
+
 async def get_auth_service(
-        user_repository: UserRepository = Depends(get_user_repository),
-        google_client: GoogleClient = Depends(get_google_client),
-        yandex_client: YandexClient = Depends(get_yandex_client),
-        mail_client: MailClient = Depends(get_mail_client)
+    user_repository: UserRepository = Depends(get_user_repository),
+    google_client: GoogleClient = Depends(get_google_client),
+    yandex_client: YandexClient = Depends(get_yandex_client),
+    mail_client: MailClient = Depends(get_mail_client),
 ) -> AuthService:
     return AuthService(
         user_repository=user_repository,
         settings=Settings(),
         google_client=google_client,
         yandex_client=yandex_client,
-        mail_client=mail_client
+        mail_client=mail_client,
     )
 
+
 async def get_user_service(
-        user_repository: UserRepository = Depends(get_user_repository),
-        auth_service: AuthService = Depends(get_auth_service)
+    user_repository: UserRepository = Depends(get_user_repository),
+    auth_service: AuthService = Depends(get_auth_service),
 ) -> UserService:
     return UserService(user_repository=user_repository, auth_service=auth_service)
 
 
 reusable_oauth2 = security.HTTPBearer()
+
 
 async def get_request_user_id(
     auth_service: AuthService = Depends(get_auth_service),

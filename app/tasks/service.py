@@ -23,16 +23,21 @@ class TaskService:
         task = await self.task_repository.get_task(task_id)
         return TaskSchema.model_validate(task)
 
-    async def update_task_name(self, task_id: int, name: str, user_id: int) -> TaskSchema:
-        task = await self.task_repository.get_user_task(user_id=user_id, task_id=task_id)
+    async def update_task_name(
+        self, task_id: int, name: str, user_id: int
+    ) -> TaskSchema:
+        task = await self.task_repository.get_user_task(
+            user_id=user_id, task_id=task_id
+        )
         if not task:
             raise TaskNotFound
         task = await self.task_repository.update_task_name(task_id=task_id, name=name)
         return TaskSchema.model_validate(task)
 
     async def delete_task(self, task_id: int, user_id: int) -> None:
-        task = await self.task_repository.get_user_task(user_id=user_id, task_id=task_id)
+        task = await self.task_repository.get_user_task(
+            user_id=user_id, task_id=task_id
+        )
         if not task:
             raise TaskNotFound
         await self.task_repository.delete_task(task_id=task_id, user_id=user_id)
-

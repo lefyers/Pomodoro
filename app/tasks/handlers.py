@@ -9,14 +9,16 @@ from app.tasks.service import TaskService
 
 router = APIRouter(prefix="/task", tags=["task"])
 
+
 async def get_tasks_log(tasks_count: int):
     # await asyncio.sleep(3.0)
     print(f"get {tasks_count} tasks")
 
+
 @router.get("/all", response_model=list[TaskSchema])
 async def get_tasks(
-        task_service: Annotated[TaskService, Depends(get_task_service)],
-        background_tasks: BackgroundTasks,
+    task_service: Annotated[TaskService, Depends(get_task_service)],
+    background_tasks: BackgroundTasks,
 ):
     tasks = await task_service.get_tasks()
     background_tasks.add_task(get_tasks_log, tasks_count=len(tasks))
@@ -39,10 +41,12 @@ async def patch_task(
     task_id: int,
     name: str,
     task_service: Annotated[TaskService, Depends(get_task_service)],
-    user_id: int = Depends(get_request_user_id)
+    user_id: int = Depends(get_request_user_id),
 ):
     try:
-        return await task_service.update_task_name(task_id=task_id, name=name, user_id=user_id)
+        return await task_service.update_task_name(
+            task_id=task_id, name=name, user_id=user_id
+        )
     except TaskNotFound as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=e.detail)
 

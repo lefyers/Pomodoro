@@ -3,7 +3,12 @@ from datetime import datetime as dt, UTC, timedelta
 
 from jose import jwt, JWTError
 
-from app.exception import UserNotFoundException, UserNotCorrectPasswordException, TokenExpired, TokenNotCorrect
+from app.exception import (
+    UserNotFoundException,
+    UserNotCorrectPasswordException,
+    TokenExpired,
+    TokenNotCorrect,
+)
 from app.settings import Settings
 from app.users.auth.client import GoogleClient
 from app.users.auth.client import YandexClient
@@ -32,7 +37,7 @@ class AuthService:
         create_user_data = UserCreateSchema(
             google_access_token=user_data.access_token,
             email=user_data.email,
-            name=user_data.name
+            name=user_data.name,
         )
         created_user = await self.user_repository.create_user(create_user_data)
         access_token = self.generate_access_token(user_id=created_user.id)
@@ -42,14 +47,16 @@ class AuthService:
     async def yandex_auth(self, code: str):
         user_data = await self.yandex_client.get_user_info(code=code)
 
-        if user := await self.user_repository.get_user_by_email(email=user_data.default_email):
+        if user := await self.user_repository.get_user_by_email(
+            email=user_data.default_email
+        ):
             access_token = self.generate_access_token(user_id=user.id)
             return UserLoginSchema(user_id=user.id, access_token=access_token)
 
         create_user_data = UserCreateSchema(
             yandex_access_token=user_data.access_token,
             email=user_data.default_email,
-            name=user_data.name
+            name=user_data.name,
         )
         created_user = await self.user_repository.create_user(create_user_data)
         access_token = self.generate_access_token(user_id=created_user.id)
@@ -78,15 +85,22 @@ class AuthService:
     def generate_access_token(self, user_id: str):
         payload = {
             "user_id": user_id,
-            "expire": (dt.now(UTC) + timedelta(days=7)).timestamp()
+            "expire": (dt.now(UTC) + timedelta(days=7)).timestamp(),
         }
-        encoded_jwt = jwt.encode(payload, self.settings.JWT_SECRET_KEY, algorithm=self.settings.JWT_ENCODE_ALGORITHM)
+        encoded_jwt = jwt.encode(
+            payload,
+            self.settings.JWT_SECRET_KEY,
+            algorithm=self.settings.JWT_ENCODE_ALGORITHM,
+        )
         return encoded_jwt
 
     def get_user_id_from_access_token(self, access_token: str) -> int:
         try:
-            payload = jwt.decode(access_token, self.settings.JWT_SECRET_KEY,
-                                 algorithms=[self.settings.JWT_ENCODE_ALGORITHM])
+            payload = jwt.decode(
+                access_token,
+                self.settings.JWT_SECRET_KEY,
+                algorithms=[self.settings.JWT_ENCODE_ALGORITHM],
+            )
         except JWTError:
             raise TokenNotCorrect
         if payload["expire"] < dt.now(UTC).timestamp():
