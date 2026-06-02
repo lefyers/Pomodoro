@@ -3,7 +3,7 @@ name: CI
 on:
   push:
     branches: ["main"]
-  pull request:
+  pull_request:
     branches: ["main"]
 
 jobs:
@@ -18,7 +18,7 @@ jobs:
     - name: Black
       run: poetry run black app
     - name: Ruff
-    run: poetry run ruff check app
+      run: poetry run ruff check app
 
   unit-test:
     runs-on: ubuntu-latest
