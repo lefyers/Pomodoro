@@ -15,11 +15,11 @@ async def _consume(broker_consumer):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # broker_consumer = await get_broker_consumer()
-    # task = asyncio.create_task(_consume(broker_consumer))
+    broker_consumer = await get_broker_consumer()
+    task = asyncio.create_task(_consume(broker_consumer))
     yield
-    # task.cancel()
-    # await asyncio.gather(task, return_exceptions=True)
+    task.cancel()
+    await asyncio.gather(task, return_exceptions=True)
 
 
 app = FastAPI(lifespan=lifespan)

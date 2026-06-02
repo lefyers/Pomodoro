@@ -1,7 +1,7 @@
 import pytest
 import pytest_asyncio
 
-from app.dependency import get_broker_producer, get_broker_consumer
+from app.dependency import get_broker_producer
 from app.settings import Settings
 from app.users.auth.client import MailClient
 from app.users.auth.service import AuthService
