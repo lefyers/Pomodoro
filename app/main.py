@@ -50,4 +50,4 @@ async def ping_db(task_repository: TaskRepository = Depends(get_tasks_repository
 
 @app.get("/sentry-debug")
 async def trigger_error():
-    division_by_zero = 1 / 0
+    1 / 0
