@@ -8,6 +8,10 @@ from app.users.auth.service import AuthService
 from app.users.user_profile.repository import UserRepository
 
 
+class FakeBrokerProducer:
+    async def send_welcome_email(self, email_data):
+        pass
+
 @pytest_asyncio.fixture
 async def mock_auth_service(yandex_client, google_client, fake_user_repository):
     return AuthService(
@@ -17,7 +21,7 @@ async def mock_auth_service(yandex_client, google_client, fake_user_repository):
         yandex_client=yandex_client,
         mail_client=MailClient(
             settings=Settings(),
-            broker_producer=await get_broker_producer()
+            broker_producer=FakeBrokerProducer(),
         )
     )
 

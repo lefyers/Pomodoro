@@ -32,7 +32,7 @@ async def get_broker_consumer() -> BrokerConsumer:
     return BrokerConsumer(
         consumer=AIOKafkaConsumer(
             settings.EMAIL_CALLBACK_TOPIC,
-            bootstrap_servers="localhost:9092",
+            bootstrap_servers=settings.BROKER_URL,
             value_deserializer=lambda message: json.loads(message.decode("utf-8")),
         ),
         email_callback_topic=settings.EMAIL_CALLBACK_TOPIC,
@@ -41,12 +41,10 @@ async def get_broker_consumer() -> BrokerConsumer:
 
 async def get_mail_client(
     broker_producer=Depends(get_broker_producer),
-    broker_consumer=Depends(get_broker_consumer),
 ) -> MailClient:
     return MailClient(
         settings=Settings(),
         broker_producer=broker_producer,
-        broker_consumer=broker_consumer,
     )
 
 
