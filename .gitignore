@@ -3,4 +3,5 @@
 __pycache__/
 *.local*
 pomodoro-analytics.pur
-
+.dev.env
+.prod.env

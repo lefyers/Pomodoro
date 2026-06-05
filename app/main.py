@@ -6,6 +6,14 @@ from app.tasks.handlers import router as task_router
 from app.tasks.repository import TaskRepository
 from app.users.auth.handlers import router as auth_router
 from app.users.user_profile.handlers import router as user_router
+import sentry_sdk
+
+sentry_sdk.init(
+    dsn="https://a61b03b1eb6278d762383658ad9615c8@o4511496344698880.ingest.us.sentry.io/4511496355381248",
+    # Add data like request headers and IP for users,
+    # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
+    send_default_pii=True,
+)
 
 
 async def _consume(broker_consumer):
@@ -15,11 +23,11 @@ async def _consume(broker_consumer):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    broker_consumer = await get_broker_consumer()
-    task = asyncio.create_task(_consume(broker_consumer))
+    # broker_consumer = await get_broker_consumer()
+    # task = asyncio.create_task(_consume(broker_consumer))
     yield
-    task.cancel()
-    await asyncio.gather(task, return_exceptions=True)
+    # task.cancel()
+    # await asyncio.gather(task, return_exceptions=True)
 
 
 app = FastAPI(lifespan=lifespan)
@@ -37,3 +45,8 @@ async def ping_app():
 @app.get("/db/ping")
 async def ping_db(task_repository: TaskRepository = Depends(get_tasks_repository)):
     await task_repository.ping_db()
+
+
+@app.get("/sentry-debug")
+async def trigger_error():
+    division_by_zero = 1 / 0
