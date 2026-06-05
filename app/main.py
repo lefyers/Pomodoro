@@ -1,7 +1,8 @@
-import asyncio
+# import asyncio
+# from app.dependency import get_broker_consumer
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends
-from app.dependency import get_broker_consumer, get_tasks_repository
+from app.dependency import  get_tasks_repository
 from app.tasks.handlers import router as task_router
 from app.tasks.repository import TaskRepository
 from app.users.auth.handlers import router as auth_router
